@@ -14,31 +14,44 @@ make run
 
 ```
 
+## Uses
+
+- Docker
+- Docker Compose
+- Go 1.22
+
 
 
 
 ## Makefile Example
 
 ```
-# Example environment variables
-DSN=username:password@tcp(127.0.0.1:3306)/database_name
-MIGRATEDSN=mysql://username:password@tcp(127.0.0.1:3306)/database_name
+# Makefile template
+
+# Environment variables
+DSN=username:password@tcp(localhost:3306)/dbname
+MIGRATEDSN=mysql://username:password@tcp(localhost:3306)/dbname
 SMTP_HOST=your_smtp_host
 SMTP_PORT=your_smtp_port
 SMTP_USER=your_smtp_username
 SMTP_USER_PASS=your_smtp_password
-SMTP_TO_ADDRESS=sendmailsto@thisaddress.com
-SMTP_FROM_ADDRESS=sendmailfrom@thisaddress.com
+SMTP_TO_ADDRESS=recipient@example.com
+SMTP_FROM_ADDRESS=sender@example.com
 
-# Targets
+.PHONY: docker build run migrateup migratedown deploy
+
 docker:
 	@echo "Starting Docker..."
 	@docker-compose down
 	@docker-compose up -d
 
+build:
+	@echo "Building..."
+	@go build -o ./bin/web cmd/web/*.go
+
 run:
-	@echo "Running application..."
-	@go run ./cmd/web/*.go -dsn="${DSN}" -port=8080 -smtp_host="${SMTP_HOST}" -smtp_port="${SMTP_PORT}" -smtp_user="${SMTP_USER}" -smtp_user_pass="${SMTP_USER_PASS}" -smtp_to_address="${SMTP_TO_ADDRESS}" -smtp_from_address="${SMTP_FROM_ADDRESS}" 
+	@echo "Running..."
+	@go run ./cmd/web/*.go -dsn="${DSN}" -port=8080 -smtp_host="${SMTP_HOST}" -smtp_port="${SMTP_PORT}" -smtp_user="${SMTP_USER}" -smtp_user_pass="${SMTP_USER_PASS}" -smtp_to_address="${SMTP_TO_ADDRESS}" -smtp_from_address="${SMTP_FROM_ADDRESS}"
 
 migrateup:
 	@echo "Migrating up..."
@@ -47,6 +60,11 @@ migrateup:
 migratedown:
 	@echo "Migrating down..."
 	@migrate -path=./migrations -database="${MIGRATEDSN}" down
+
+deploy:
+	@echo "Deploying..."
+	@$(MAKE) build
+	@./bin/web/main -dsn="${DSN}" -port=8080 -smtp_host="${SMTP_HOST}" -smtp_port="${SMTP_PORT}" -smtp_user="${SMTP_USER}" -smtp_user_pass="${SMTP_USER_PASS}" -smtp_to_address="${SMTP_TO_ADDRESS}" -smtp_from_address="${SMTP_FROM_ADDRESS}"
 ```
 
 ## Docker Compose Example

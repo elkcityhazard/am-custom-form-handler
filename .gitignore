@@ -4,3 +4,4 @@ Makefile
 **/static
 **/data
 **/migrations
+**/bin
