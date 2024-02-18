@@ -1,0 +1,15 @@
+{{ define "base" }}
+
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head" . }}
+<body>
+    <a href="#content" class="skip-link">Skip to main content</a>
+    {{ template "message" . }}
+    {{ block "content" . }}{{ end }}
+
+    
+</body>
+</html>
+
+{{ end }}

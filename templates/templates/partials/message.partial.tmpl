@@ -1,0 +1,11 @@
+{{ define "message" }}
+
+{{ with .Flash }}
+<p>{{.}}</p>
+{{ end }} 
+
+{{ with .Error }}
+<p>{{.}}</p>
+{{ end }} 
+
+{{ end }}

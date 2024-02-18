@@ -1,0 +1,30 @@
+{{ template "base" . }}
+
+{{ define "title" }} My Title {{ end }}
+
+{{ define "content" }}
+<section class="success">
+<div class="container">
+  <div class="row">
+    <div class="col">
+      {{ with.DataMap.EmailMessage }}
+      <h1>Thank You For Emailing Me!</h1>
+      <p>You Submitted The Following Information: </p>
+      <ul>
+        <li>To: {{ .To | sanitizeHTML }}</li>
+        <li>From: {{.From | sanitizeHTML }}</li>
+        <li>FromName: {{.FromName | sanitizeHTML }}</li>
+        <li>Subject: {{.Subject | sanitizeHTML }}</li>
+        <li>PlainTextbody: {{.PlainTextbody | sanitizeHTML }}</li>
+        <li>HTMLBody: {{.HTMLBody }}</li>
+      </ul>
+
+      <p>We look forward to reading and responding to your message within the next few days.  Until then, stay peaceful :-)</p>
+      <br />
+      <p> - <strong>AM McCall</strong></p>
+      {{ end }}
+    </div>
+  </div>
+</div>
+</section>
+{{ end }}

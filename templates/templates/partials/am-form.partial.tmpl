@@ -1,0 +1,40 @@
+{{ define "am-form" }}
+
+<section class="form" id="content">
+    <div class="container">
+        <div class="row">
+            <form method="post" action="/am-form" id="contact-am">
+            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+                <div class="form-control">
+                   <label for="email">Email:</label>
+                   <input type="text" name="email" id="formEmail" placeholder="yourname@example.com" value="{{ .DataMap.Form.Values.Get "email"  }}" />
+                   {{ with .DataMap.Form.Errors.Get "email" }}
+                    {{ . }}
+                   {{ end }}
+                </div>
+                <div class="form-control">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" name="firstName" id="formFirstName" value="{{ .DataMap.Form.Values.Get "firstName" }}" />
+                    {{ with .DataMap.Form.Errors.Get "firstName" }}
+                        {{ . }}
+                        {{ end }}
+                </div>
+                <div class="form-control">
+                    <label for="message">Message:</label>
+                    <textarea name="message" id="formMessage" rows="5">{{ .DataMap.Form.Values.Get "message" }}</textarea>
+                    {{ with .DataMap.Form.Errors.Get "message" }}
+                        {{ . }}
+                   {{ end }}
+                </div>
+                <div class="form-control">
+                    <label for="submit">Submit:</label>
+                    <input type="hidden" name="password" id="formPassword">
+                    <input type="submit" name="submit" id="formSubmit" value="Submit" />
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+{{ end }}
+

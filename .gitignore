@@ -1,0 +1,6 @@
+.env
+docker-compose.yml
+Makefile
+**/static
+**/data
+**/migrations

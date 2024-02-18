@@ -1,0 +1,15 @@
+
+
+{{ define "subject" }} {{ end }}
+
+{{ define "plainText" }} {{ end }}
+
+{{ define "htmlBody" }} 
+
+{{ template "base" . }}
+
+{{ block "content" . }}
+    <p>This is the content of the email</p>
+{{ end }}
+
+{{ end }}

@@ -1,0 +1,30 @@
+
+
+{{ define "subject" }} {{ end }}
+
+{{ define "plainText" }} 
+{{ with .FromName }} From: {{ . }} {{ end }}
+{{ with .To }} To: {{ . }} {{ end }}
+{{ with .Subject }} Subject: {{ . }} {{ end }}
+
+{{ with .PlainTextbody }} {{ . }} {{ end }}
+
+{{ end }}
+
+{{ define "htmlBody" }} 
+
+{{ block "content" . }}
+
+<h1>New Message From, {{ .FromName }}</h1>
+
+<ul style="max-width: 499px; margin: 0 auto;">
+    <li>From: {{ .FromName }}</li>
+    <li>To: {{ .To }}</li>
+    <li>Subject: {{ .Subject }}</li>
+</ul>
+
+<p style="max-width: 499px; margin: 1rem auto;">{{ .HTMLBody }}</p>
+    
+{{ end }}
+
+{{ end }}
