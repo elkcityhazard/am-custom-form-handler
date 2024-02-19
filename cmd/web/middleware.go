@@ -10,6 +10,10 @@ import (
 func StripTrailingSlash(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		r.URL.Path = strings.TrimSpace(r.URL.Path)
+
+		r.URL.Path = strings.Replace(r.URL.Path, " ", "-", -1)
+
 		switch r.URL.Path {
 		case "/":
 			next.ServeHTTP(w, r)
@@ -45,4 +49,16 @@ func NoSurf(next http.Handler) http.Handler {
 
 func SessionLoad(next http.Handler) http.Handler {
 	return app.SessionManager.LoadAndSave(next)
+}
+
+func PanicRecovery(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }

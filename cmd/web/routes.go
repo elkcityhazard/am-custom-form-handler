@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/fs"
-	"log"
 	"net/http"
 
 	"github.com/elkcityhazard/am-form/internal/handlers"
@@ -10,13 +9,6 @@ import (
 )
 
 func routes() http.Handler {
-
-	defer func() {
-		if r := recover(); r != nil {
-			// r contains the value passed to panic()
-			log.Printf("Recovering from panic: %v", r)
-		}
-	}()
 
 	var staticDir = static.GetStaticDir()
 
@@ -45,6 +37,16 @@ func routes() http.Handler {
 
 	r.HandleFunc("/success", handlers.HandleDisplaySuccess)
 
-	return StripTrailingSlash(NoSurf(SessionLoad(r)))
+	r.HandleFunc("/panic", panicHandler)
 
+	return PanicRecovery(StripTrailingSlash(NoSurf(SessionLoad(r))))
+
+}
+
+func panicHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.WriteHeader(http.StatusInternalServerError)
+	defer func() {
+		panic("Internal Server Error")
+	}()
 }
