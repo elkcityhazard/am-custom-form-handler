@@ -13,7 +13,7 @@ import (
 // Assuming static, app, handlers, StripTrailingSlash, NoSurf, and SessionLoad are defined elsewhere in your package
 
 // TestRoutes checks that the routes function recovers from panics and registers handlers correctly.
-func TestRoutes(t *testing.T) {
+func Test_Routes(t *testing.T) {
 	// Create a test server
 	ts := httptest.NewServer(routes())
 	defer ts.Close()
@@ -61,6 +61,7 @@ func TestRoutes(t *testing.T) {
 		if resp.StatusCode != http.StatusInternalServerError {
 			t.Errorf("Expected status code 500, got %v", resp.StatusCode)
 		}
+
 	})
 
 	// Test app.IsProduction
