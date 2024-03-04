@@ -44,24 +44,24 @@ func New() *Mailer {
 	return &Mailer{}
 }
 
-func (m *Mailer) ListenForMail(errorChan chan error, messageChan chan *EmailMessage, mailerDoneChan chan bool) {
+func (m *Mailer) ListenForMail(errorChan chan error, messageChan chan *EmailMessage, mailerDoneChan chan bool) error {
 	for {
 		select {
 		case msg := <-messageChan:
 			log.Printf("Sending email to %s - from %s\n", msg.To, msg.From)
 			go m.SendMail(msg, mailerDoneChan, errorChan)
 		case err := <-errorChan:
-			log.Println(err)
+			return err
 
 		case <-mailerDoneChan:
 			fmt.Println("mailer done")
-			return
+			return nil
 
 		}
 	}
 }
 
-func (m *Mailer) SendMail(emailMessage *EmailMessage, doneChan chan bool, errorChan chan error) error {
+func (m *Mailer) SendMail(emailMessage *EmailMessage, doneChan chan bool, errorChan chan error) {
 
 	go func() {
 
@@ -112,17 +112,10 @@ func (m *Mailer) SendMail(emailMessage *EmailMessage, doneChan chan bool, errorC
 			errorChan <- err
 		}
 
+		doneChan <- true
+
 	}()
 
-	err := <-errorChan
-
-	doneChan <- true
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (m *Mailer) SendPlainText(emailMessage *EmailMessage) error {
