@@ -5,6 +5,7 @@
         <div class="row">
             <form method="post" action="/am-form" id="contact-am">
             <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+            <input type="hidden" name="username" value="" id="username_field">
                 <div class="form-control">
                    <label for="email">Email:</label>
                    <input type="text" name="email" id="formEmail" placeholder="yourname@example.com" value="{{ .DataMap.Form.Values.Get "email"  }}" />

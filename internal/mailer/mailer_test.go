@@ -1,14 +1,28 @@
 package mailer
 
 import (
-	"bytes"
-	"log"
-	"os"
+	"embed"
+	"errors"
+	"html/template"
 	"testing"
 	"time"
 
 	"github.com/go-mail/mail/v2"
 )
+
+type MockTemplateLoader struct {
+	FS embed.FS
+}
+
+func NewMockTemplateLoader() *MockTemplateLoader {
+	return &MockTemplateLoader{}
+}
+
+func (m *MockTemplateLoader) LoadTemplate(name string) (*template.Template, error) {
+	// Simulate an error when loading the template
+
+	return nil, errors.New("my error")
+}
 
 func Test_New(t *testing.T) {
 	var mailer = New()
@@ -19,90 +33,87 @@ func Test_New(t *testing.T) {
 
 func Test_ListenForMail(t *testing.T) {
 
-	t.Log("staring listen for mail")
+	var mailer = New()
 
-	tests := []struct {
-		name     string
-		host     int
-		username string
-		password string
-		expected string
-	}{
-		{
-			name:     "no host",
-			host:     0,
-			username: "test",
-			password: "test",
-			expected: "localhost",
-		},
-		{
-			name:     "no username",
-			host:     1025,
-			username: "",
-			password: "test",
-			expected: "test",
-		},
-		{
-			name:     "no password",
-			host:     1025,
-			username: "test",
-			password: "",
-			expected: "test",
-		},
+	mailer.TemplateLoader = NewTemplateLoader()
+
+	mailer.Dialer = mail.NewDialer("localhost", 1025, "test", "test")
+
+	mailer.Dialer.Timeout = 5 * time.Second
+
+	doneChan := make(chan bool)
+	errorChan := make(chan error)
+	emailMessageChan := make(chan *EmailMessage)
+
+	go mailer.ListenForMail(errorChan, emailMessageChan, doneChan)
+
+	emailMessage := &EmailMessage{
+		To:            "test@example.com",
+		From:          "test@example.com",
+		FromName:      "test",
+		Subject:       "Test message",
+		HTMLBody:      "test",
+		PlainTextbody: "Test",
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var mailer = New()
+	t.Log("sending email", emailMessage)
 
-			mailer.Dialer = mail.NewDialer("localhost", 1025, "test", "test")
+	emailMessageChan <- emailMessage
 
-			mailer.Dialer.Timeout = 5 * time.Second
+	testErr := errors.New("test err")
 
-			doneChan := make(chan bool)
-			errorChan := make(chan error)
-			emailMessageChan := make(chan *EmailMessage)
+	errorChan <- testErr
 
-			go mailer.ListenForMail(errorChan, emailMessageChan, doneChan)
+	<-doneChan
 
-			emailMessage := &EmailMessage{
-				To:            "test@example.com",
-				From:          "test@example.com",
-				FromName:      "test",
-				Subject:       "Test message",
-				HTMLBody:      "test",
-				PlainTextbody: "Test",
-			}
+	close(doneChan)
+	close(errorChan)
+	close(emailMessageChan)
+}
 
-			t.Log("sending email", emailMessage)
+func Test_SendMail(t *testing.T) {
+	// Create a new Mailer instance
+	var mailer = &Mailer{}
 
-			emailMessageChan <- emailMessage
+	// Set up the mock template loader to return an error
+	mailer.TemplateLoader = &MockTemplateLoader{}
 
-			for {
+	// Set up the dialer and other necessary fields for the mailer
+	mailer.Dialer = mail.NewDialer("localhost", 1025, "test", "test")
+	mailer.Dialer.Timeout = 5 * time.Second
 
-				select {
-				case err := <-errorChan:
-					var buf bytes.Buffer
-
-					log.SetOutput(&buf)
-
-					log.Println(err)
-
-					t.Log(buf.String())
-
-					log.SetOutput(os.Stderr)
-
-					if buf.String() == "" {
-
-						t.Error("no error")
-					}
-
-				case <-doneChan:
-					t.Log("mailer done")
-					return
-				}
-			}
-		})
+	// Prepare the email message
+	emailMessage := &EmailMessage{
+		To:            "test@example.com",
+		From:          "test@example.com",
+		FromName:      "test",
+		Subject:       "Test message",
+		HTMLBody:      "test",
+		PlainTextbody: "Test",
 	}
 
+	// Create channels for done, error, and email message
+	doneChan := make(chan bool)
+	errorChan := make(chan error)
+
+	// Call SendMail in a goroutine
+	go mailer.SendMail(emailMessage, doneChan, errorChan)
+
+	// Wait for an error to be received on the errorChan
+	select {
+	case err := <-errorChan:
+		if err == nil {
+			t.Error("Expected an error but received nil")
+		} else {
+			t.Log("Received expected error:", err)
+		}
+	case <-doneChan:
+		t.Error("Expected an error but received done signal")
+	case <-time.After(time.Second):
+		t.Error("Timeout waiting for error")
+	}
+
+	// Cleanup
+	close(doneChan)
+	close(errorChan)
 }

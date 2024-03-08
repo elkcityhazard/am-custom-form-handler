@@ -13,18 +13,31 @@
 
 {{ define "htmlBody" }} 
 
-{{ block "content" . }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email From Andrew</title>
+</head>
+<body>
+    <div class="wrapper" style="max-width: 499px; margin: auto;">
+        {{ block "content" . }}
 
-<h1>New Message From, {{ .FromName }}</h1>
+        <h1>New Message From, {{ .FromName }}</h1>
+        
+        <ul style="max-width: 499px; margin: 0 auto; list-style:none; padding-left:0;">
+            <li><strong>From: </strong>{{ .FromName }}</li>
+            <li><strong>To: </strong> {{ .To }}</li>
+            <li><strong>Subject: </strong> {{ .Subject }}</li>
+        </ul>
+        
+        <div style="max-width: 499px; margin: 1rem auto;">{{ .HTMLBody }}</div>
+            
+        {{ end }}
+    </div>
+</body>
+</html>
 
-<ul style="max-width: 499px; margin: 0 auto;">
-    <li>From: {{ .FromName }}</li>
-    <li>To: {{ .To }}</li>
-    <li>Subject: {{ .Subject }}</li>
-</ul>
-
-<p style="max-width: 499px; margin: 1rem auto;">{{ .HTMLBody }}</p>
-    
-{{ end }}
 
 {{ end }}

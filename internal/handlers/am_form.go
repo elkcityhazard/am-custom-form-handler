@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
@@ -44,6 +45,17 @@ func HandleDisplayAMForm(w http.ResponseWriter, r *http.Request) {
 		if len(form.Values.Get("password")) > 0 {
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
+		}
+
+		username := form.Values.Get("username")
+
+		if len(username) > 0 {
+
+			err := errors.New("bad request")
+
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+
 		}
 
 		form.Required("firstName", "email", "message")

@@ -33,7 +33,7 @@ func routes() http.Handler {
 		r.Handle("/static/assets/", http.StripPrefix("/static/assets/", http.FileServer(http.Dir("./static/assets/"))))
 	}
 
-	r.HandleFunc("/am-form", handlers.HandleDisplayAMForm)
+	r.HandleFunc("/", handlers.HandleDisplayAMForm)
 
 	r.HandleFunc("/success", handlers.HandleDisplaySuccess)
 
